@@ -1,0 +1,8 @@
+asset:        vidora-wordmark-dark.png
+title:        VIDORA wordmark, dark lettering (light themes)
+author:       Imal Madhusanka (VIDORA)
+source:       original work (VIDORA logo designed by Imal Madhusanka)
+license:      © 2026 Imal Madhusanka. The VIDORA name and logo are Imal Madhusanka's; they are not covered by the code licence and may be used only to identify VIDORA.
+license-file: assets/app-icon/LICENSE.txt
+added:        2026-10-19 for VIDORA (Imal Madhusanka)
+notes:        Symbol tile + VIDORA in Inter Bold (OFL-1.1). Drawn by crates/ui-egui/src/brand.rs. Made by packaging/vidora/make_logo_assets.py.

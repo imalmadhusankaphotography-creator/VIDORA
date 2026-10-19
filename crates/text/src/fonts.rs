@@ -546,7 +546,8 @@ mod tests {
         let craft: Vec<_> = all_faces().into_iter().filter(|f| f.info.origin == CRAFT_ORIGIN).collect();
         if craft_japanese().next().is_none() {
             eprintln!("SKIPPED: built without craft-fonts (set CRAFT_FONTS_DIR to run)");
-            assert!(craft.is_empty());
+            // VIDORA embeds its Sinhala fonts this way, so non-Japanese craft faces may be here
+            assert!(craft.iter().all(|f| !f.has_char('日')));
             return;
         }
         assert!(craft.len() >= craft_japanese().count(), "{} faces", craft.len());

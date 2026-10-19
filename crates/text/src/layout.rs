@@ -398,7 +398,7 @@ fn paragraph(text: &str, base: usize, sty: &Styles, para: &ParagraphStyle) -> Ve
     let pinfo = &bidi.paragraphs[0];
     let base_rtl = pinfo.level.is_rtl();
     // per char: (byte, char, shaped char), face, level, small, style
-    let chars: Vec<(usize, char, char, FaceId, bool, bool, usize)> = text
+    let mut chars: Vec<(usize, char, char, FaceId, bool, bool, usize)> = text
         .char_indices()
         .map(|(b, c)| {
             let si = sty.at(base + b);
@@ -413,6 +413,19 @@ fn paragraph(text: &str, base: usize, sty: &Styles, para: &ParagraphStyle) -> Ve
             (b, c, sc, face, bidi.levels[b].is_rtl(), small, si)
         })
         .collect();
+    // Joiners and variation selectors belong to the cluster before them: the ZWJ in Sinhala ශ්‍රී
+    // or ක්‍ය must be shaped in the same face as its consonants, not in whichever face happens to map
+    // U+200D, or the conjunct falls apart (VIDORA).
+    for k in 1..chars.len() {
+        let (before, after) = chars.split_at_mut(k);
+        if let (Some(p), Some(c)) = (before.last(), after.first_mut())
+            && is_cluster_joiner(c.2)
+            && p.6 == c.6
+            && !p.2.is_whitespace()
+        {
+            c.3 = p.3;
+        }
+    }
     // items: runs of equal (face, rtl, small, style)
     let mut items: Vec<Item> = Vec::new();
     let mut i = 0;
@@ -619,6 +632,12 @@ fn paragraph(text: &str, base: usize, sty: &Styles, para: &ParagraphStyle) -> Ve
 }
 
 /// Lay out `text` (paragraphs separated by `\n`).
+/// Characters that never stand alone but join the cluster before them: ZWNJ, ZWJ, the combining
+/// grapheme joiner and the variation selectors.
+fn is_cluster_joiner(c: char) -> bool {
+    matches!(c, '\u{200C}' | '\u{200D}' | '\u{034F}' | '\u{FE00}'..='\u{FE0F}' | '\u{E0100}'..='\u{E01EF}')
+}
+
 pub fn layout_uncached(text: &str, style: &TextStyle, para: &ParagraphStyle) -> Layout {
     layout_rich_uncached(text, style, &[], para)
 }
@@ -1127,6 +1146,21 @@ mod tests {
         assert_eq!(stops, vec![0, 1, 2, 3, 4, 5, 6]);
         let xs: Vec<f32> = l.lines[0].carets.iter().map(|c| c.1).collect();
         assert!(xs.windows(2).all(|w| w[1] >= w[0]), "{xs:?}");
+    }
+
+    #[test]
+    fn sinhala_conjuncts_survive_font_fallback() {
+        // ශ්‍රී (sha + virama + ZWJ + ra + ii) set in Inter falls back to a Sinhala face; the ZWJ
+        // must stay in that face so the conjunct shapes exactly as in the Sinhala family itself.
+        if !crate::fonts::families().iter().any(|(f, _)| f == "Noto Sans Sinhala") {
+            eprintln!("SKIPPED: built without the Sinhala fonts (CRAFT_FONTS_DIR=packaging/vidora)");
+            return;
+        }
+        let ids = |family: &str| -> Vec<u32> {
+            let l = layout("\u{0DC1}\u{0DCA}\u{200D}\u{0DBB}\u{0DD3}", &TextStyle { family: family.into(), ..st(40.0) }, &ParagraphStyle::default());
+            l.glyphs.iter().map(|g| g.id).collect()
+        };
+        assert_eq!(ids("Inter"), ids("Noto Sans Sinhala"));
     }
 
     #[test]

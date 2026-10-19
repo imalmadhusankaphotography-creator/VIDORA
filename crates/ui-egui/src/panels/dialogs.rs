@@ -453,19 +453,18 @@ fn about_tab(app: &mut FilmcraftApp, ui: &mut egui::Ui) {
     use crate::links;
     let t = app.tokens;
     ui.set_width(380.0);
-    // The VIDORA wordmark, when the build has one (crate::brand).
+    // The VIDORA wordmark (symbol and name), or the name as a heading when the build has none.
     if crate::brand::has_wordmark() {
-        let (r, _) = ui.allocate_exact_size(egui::vec2(ui.available_width(), 30.0), egui::Sense::hover());
-        crate::brand::paint_wordmark(ui, egui::pos2(r.min.x, r.center().y), 20.0, app.ui.dark);
-        ui.add_space(6.0);
+        let (r, _) = ui.allocate_exact_size(egui::vec2(ui.available_width(), 52.0), egui::Sense::hover());
+        crate::brand::paint_wordmark(ui, egui::pos2(r.min.x, r.center().y), 44.0, app.ui.dark);
+        ui.add_space(4.0);
+    } else {
+        ui.heading("VIDORA");
     }
-    ui.heading("VIDORA");
     ui.label(tlf!("Version {version}", version = env!("CARGO_PKG_VERSION")));
     ui.label("A Premiere Pro-style video editor by Imal Madhusanka.");
     ui.label(
-        egui::RichText::new("Built on FilmCraft by the ArtCraft team and the FilmCraft contributors; not made or endorsed by them.")
-            .small()
-            .color(t.text_dim),
+        egui::RichText::new("Built on FilmCraft by the ArtCraft team and the FilmCraft contributors; not made or endorsed by them.").small().color(t.text_dim),
     );
     ui.add_space(10.0);
     let mut link = |ui: &mut egui::Ui, id: &str, icon: Icon, label: &str, url: &str, primary: bool| {
@@ -501,8 +500,6 @@ fn about_tab(app: &mut FilmcraftApp, ui: &mut egui::Ui) {
     link(ui, "reportIssue", Icon::Code, tl!("Report an issue"), links::ISSUES, false);
     ui.add_space(10.0);
     ui.label(
-        egui::RichText::new("MIT OR Apache-2.0. Fonts: Inter, Noto Serif, Noto Sans/Serif Sinhala and JetBrains Mono (SIL OFL 1.1).")
-            .small()
-            .color(t.text_dim),
+        egui::RichText::new("MIT OR Apache-2.0. Fonts: Inter, Noto Serif, Noto Sans/Serif Sinhala and JetBrains Mono (SIL OFL 1.1).").small().color(t.text_dim),
     );
 }

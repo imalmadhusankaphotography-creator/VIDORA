@@ -1,13 +1,14 @@
 //! The VIDORA wordmark (Imal Madhusanka's logo for VIDORA), decoded once and kept as a texture.
 //!
 //! FilmCraft drew the ArtCraft wordmark here. VIDORA is a modified version of FilmCraft, so under
-//! the ArtCraft brand licence it carries its own marks instead. Until the VIDORA wordmark is
-//! added (`LOGO_LIGHT_INK` / `LOGO_DARK_INK`), nothing is drawn and callers fall back to text.
+//! the ArtCraft brand licence it carries its own marks instead: the VIDORA symbol on its tile and
+//! the name (made by packaging/vidora/make_logo_assets.py). Without them (`None`), nothing is
+//! drawn and callers fall back to text.
 
 /// The wordmark for dark themes (light ink), as a PNG, when the build has one.
-const LOGO_LIGHT_INK: Option<&[u8]> = None;
+const LOGO_LIGHT_INK: Option<&[u8]> = Some(include_bytes!("../../../assets/app-icon/vidora-wordmark-light.png"));
 /// The wordmark for light themes (dark ink), as a PNG, when the build has one.
-const LOGO_DARK_INK: Option<&[u8]> = None;
+const LOGO_DARK_INK: Option<&[u8]> = Some(include_bytes!("../../../assets/app-icon/vidora-wordmark-dark.png"));
 
 /// Whether this build has a wordmark to draw.
 pub fn has_wordmark() -> bool {

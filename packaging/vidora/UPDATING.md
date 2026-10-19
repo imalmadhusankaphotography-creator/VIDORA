@@ -26,7 +26,10 @@ Places that conflict most often (VIDORA changed them by hand, not by the script)
 - `crates/ui-egui/src/links.rs`, `menus.rs` (Help menu), `header.rs` (no Discord button),
   `panels/import_mode.rs` (Home links), `panels/dialogs.rs` (About), `brand.rs` (VIDORA wordmark)
 - `apps/filmcraft/build.rs` (exe name, author, copyright), `apps/filmcraft/src/native_menu.rs`
-- `assets/app-icon/*` (VIDORA icon: regenerate with `packaging/vidora/make_icons.py`)
+- `assets/app-icon/*` (VIDORA icon: regenerate with `packaging/vidora/make_logo_assets.py`)
 - `README.md`, `NOTICE`, `ATTRIBUTION.md`, `LICENSE-MIT`
 - Keep FilmCraft's ArtCraft marks (`docs/brand/`) and workflows (`.github/workflows/` other than
   `vidora-windows.yml`) out.
+- `crates/text/src/layout.rs` (ZWJ and other joiners stay in the face of the cluster before
+  them, so Sinhala conjuncts like ශ්‍රී shape correctly in fallback) and the Japanese craft-fonts
+  test in `crates/text/src/fonts.rs`

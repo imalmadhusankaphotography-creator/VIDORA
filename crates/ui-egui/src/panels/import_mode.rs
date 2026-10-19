@@ -46,9 +46,10 @@ pub fn show(app: &mut FilmcraftApp, ui: &mut egui::Ui, rect: Rect) {
     }
     let y = recent(app, ui, rect, 90.0 + 150.0 + 36.0);
     // Project links: the VIDORA wordmark (when there is one), then the section title.
-    let logo = crate::brand::paint_wordmark(ui, rect.min + vec2(24.0, y), 15.0, app.ui.dark);
+    let logo = crate::brand::paint_wordmark(ui, rect.min + vec2(24.0, y), 22.0, app.ui.dark);
     let tx = logo.map_or(rect.min.x + 24.0, |r| r.max.x + 12.0);
-    ui.painter().text(pos2(tx, rect.min.y + y), Align2::LEFT_CENTER, "VIDORA", Tokens::semibold(15.0), t.text);
+    let title = if logo.is_some() { tl!("Links") } else { "VIDORA" };
+    ui.painter().text(pos2(tx, rect.min.y + y), Align2::LEFT_CENTER, title, Tokens::semibold(15.0), t.text);
     let mut x = rect.min.x + 24.0;
     for (i, (id, label, url)) in crate::links::ALL.iter().take(4).enumerate() {
         let primary = i == 0;

@@ -1,15 +1,12 @@
-VIDORA app icon (filmcraft.svg and every file derived from it in this directory:
-filmcraft-small.svg, filmcraft-1024.png, filmcraft-macos-512.png, filmcraft.icns, filmcraft.ico,
-hicolor/, and apps/filmcraft-web/web/favicon.png). The file names are FilmCraft's, kept so the build
-and packaging scripts find them; the artwork is VIDORA's.
+VIDORA app icon and wordmark (every image in this directory: filmcraft.svg, filmcraft-small.svg,
+filmcraft-1024.png, filmcraft-macos-512.png, filmcraft.icns, filmcraft.ico, hicolor/,
+vidora-wordmark-light.png, vidora-wordmark-dark.png; and apps/filmcraft-web/web/favicon.png).
+The icon file names are FilmCraft's, kept so the build and packaging scripts find them; the
+artwork is VIDORA's.
 
-Placeholder artwork for VIDORA by Imal Madhusanka (a white V on a navy-to-blue film-strip tile),
-drawn by packaging/vidora/make_icons.py. No third-party material. Licensed like the rest of
-VIDORA, under either of
+The VIDORA logo (the V-and-play symbol) was designed by Imal Madhusanka
+(packaging/vidora/logo/vidora-logo.png). These files are made from it by
+packaging/vidora/make_logo_assets.py; the wordmark lettering is set in Inter Bold (SIL OFL 1.1,
+assets/fonts/OFL-Inter.txt).
 
-  * Apache License, Version 2.0 (https://www.apache.org/licenses/LICENSE-2.0)
-  * MIT license (https://opensource.org/licenses/MIT)
-
-at your option.
-
-Regenerate the files with packaging/vidora/make_icons.py (pass a logo image to use it instead).
+© 2026 Imal Madhusanka. The VIDORA name and logo are Imal Madhusanka's; they are not covered by the code licence and may be used only to identify VIDORA.

@@ -1,3 +1,5 @@
+<p align="center"><img src="packaging/vidora/logo/vidora-icon.png" width="128" alt="VIDORA logo"></p>
+
 # VIDORA
 
 **A Premiere Pro-style video editor for Windows, by Imal Madhusanka.**
@@ -61,7 +63,7 @@ FilmCraft's; that keeps updates from FilmCraft simple).
 
 ## How VIDORA differs from FilmCraft
 
-- VIDORA name, icon and links everywhere in the app; settings live in `%APPDATA%\VIDORA`, so VIDORA
+- VIDORA name, logo and links everywhere in the app (`packaging/vidora/make_logo_assets.py` makes the icons); settings live in `%APPDATA%\VIDORA`, so VIDORA
   and FilmCraft can be installed side by side.
 - No ArtCraft logos or community links (FilmCraft's brand licence asks forks to remove them).
 - Noto Sans Sinhala and Noto Serif Sinhala are built in, for Sinhala titles and captions.
@@ -72,4 +74,5 @@ FilmCraft's; that keeps updates from FilmCraft simple).
 ## Licence
 
 MIT OR Apache-2.0, like FilmCraft (`LICENSE-MIT`, `LICENSE-APACHE`, `NOTICE`). Bundled fonts and
-other assets keep their own open licences, listed in `ATTRIBUTION.md`.
+other assets keep their own open licences, listed in `ATTRIBUTION.md`. The VIDORA name and logo
+belong to Imal Madhusanka and are not covered by the code licence.

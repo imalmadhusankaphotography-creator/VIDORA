@@ -10,7 +10,9 @@ with these VIDORA rules on top:
 - **Brand:** no ArtCraft marks, Discord or getartcraft.com links (FilmCraft's brand licence asks
   forks to remove them). Credit FilmCraft in plain text only ("built on FilmCraft by the ArtCraft
   team and the FilmCraft contributors"). VIDORA's About credits Imal Madhusanka.
-- **Icon:** `packaging/vidora/make_icons.py [logo.png]` writes every app icon file.
+- **Logo and icon:** Imal's logo is `packaging/vidora/logo/vidora-logo.png`;
+  `python3 packaging/vidora/make_logo_assets.py` makes every app icon file and the About/Home
+  wordmarks from it. The logo is his, not covered by the code licence.
 - **Build:** `.github/workflows/vidora-windows.yml` builds the MSI and portable zip
   (`packaging/vidora/package.ps1`); a `v*` tag publishes a release. The `plan/` files and the
   FilmCraft release workflows mentioned below are not part of VIDORA.
