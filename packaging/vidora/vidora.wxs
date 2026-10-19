@@ -57,12 +57,21 @@
         <File Id="VidoraCliExe" Source="$(var.BinDir)\vidora-cli.exe" KeyPath="yes" />
       </Component>
 
-      <Component Id="VidoraDocs">
+      <!-- One file per component: unversioned files can't share an automatic component GUID. -->
+      <Component Id="VidoraReadme">
         <File Id="VidoraReadme" Source="$(var.BinDir)\README.txt" KeyPath="yes" />
-        <File Id="VidoraLicenseMit" Source="$(var.BinDir)\LICENSE-MIT" />
-        <File Id="VidoraLicenseApache" Source="$(var.BinDir)\LICENSE-APACHE" />
-        <File Id="VidoraNotice" Source="$(var.BinDir)\NOTICE" />
-        <File Id="VidoraFontLicence" Source="$(var.BinDir)\OFL-NotoSinhala.txt" />
+      </Component>
+      <Component Id="VidoraLicenseMit">
+        <File Id="VidoraLicenseMit" Source="$(var.BinDir)\LICENSE-MIT" KeyPath="yes" />
+      </Component>
+      <Component Id="VidoraLicenseApache">
+        <File Id="VidoraLicenseApache" Source="$(var.BinDir)\LICENSE-APACHE" KeyPath="yes" />
+      </Component>
+      <Component Id="VidoraNotice">
+        <File Id="VidoraNotice" Source="$(var.BinDir)\NOTICE" KeyPath="yes" />
+      </Component>
+      <Component Id="VidoraFontLicence">
+        <File Id="VidoraFontLicence" Source="$(var.BinDir)\OFL-NotoSinhala.txt" KeyPath="yes" />
       </Component>
     </ComponentGroup>
   </Fragment>
