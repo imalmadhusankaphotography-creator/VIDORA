@@ -15,11 +15,13 @@ Sinhala text
   Noto Serif Sinhala fonts.
 
 If VIDORA doesn't open
-  VIDORA draws with DirectX 12 or Vulkan. If the window flashes and closes, update the graphics
-  driver, or start it from PowerShell in this folder with another backend:
+  VIDORA draws with DirectX 12 or Vulkan (Intel graphics always through DirectX 12). If a graphics
+  driver closes it before the window appears, VIDORA tries DirectX 12 only, then software
+  rendering, on the next starts; the window then says which mode it uses. Updating the graphics
+  driver usually helps. To pick a backend by hand, start it from PowerShell in this folder:
       $env:WGPU_BACKEND = "dx12"     (or "vulkan")
       & .\VIDORA.exe
-  The log in %APPDATA%\VIDORA\Logs says what went wrong.
+  The log in %APPDATA%\VIDORA\Logs (portable: data\Logs) says what went wrong.
 
 vidora-cli.exe is the command-line tool (vidora-cli help): batch export, project inspection and
 an MCP server for automation.
@@ -29,4 +31,5 @@ Updates and problems: https://github.com/imalmadhusankaphotography-creator/VIDOR
 VIDORA is built on FilmCraft by the ArtCraft team and the FilmCraft contributors
 (https://github.com/storytold/filmcraft, MIT OR Apache-2.0). It is not made or endorsed by the
 ArtCraft Team. Licences: LICENSE-MIT, LICENSE-APACHE, NOTICE, OFL-NotoSinhala.txt (the bundled
-Noto Sinhala fonts).
+Noto Sinhala fonts), DXC-LICENSE-LLVM.txt and DXC-LICENSE-MIT.txt (dxcompiler.dll, Microsoft's
+DirectX shader compiler).

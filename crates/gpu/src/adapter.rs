@@ -14,6 +14,12 @@
 //! features is used, i.e. the newer version. Without such a duplicate the choice is wgpu's own.
 //! Entries of one GPU from different drivers (RADV and AMDVLK, a vendor's driver and Dozen) are
 //! left alone: those are installed side by side on purpose, and wgpu's order between them stays.
+//!
+//! VIDORA adds one more rule ([`intel_through_dx12`]): an Intel GPU the rule picks through Vulkan
+//! draws through DirectX 12 instead when DirectX 12 lists the same GPU (Windows only). Intel's
+//! Windows Vulkan driver dies inside device creation on many laptops (FilmCraft #512 #413; a UHD
+//! Graphics 620 on driver 27.20.100.9664 never opened VIDORA's window), and two such starts were
+//! needed before the start-up fallback moved on. `WGPU_BACKEND=vulkan` still draws through Vulkan.
 
 use std::cmp::Reverse;
 use std::fmt;
@@ -91,6 +97,26 @@ fn same_gpu_and_driver(a: &Candidate, b: &Candidate) -> bool {
     identified && a.backend == b.backend && a.device_type == b.device_type && a.vendor == b.vendor && a.device == b.device && a.driver == b.driver && same_bus
 }
 
+/// PCI vendor id of Intel.
+const INTEL: u32 = 0x8086;
+
+/// `chosen`, or the DirectX 12 entry of the same GPU when `chosen` is an Intel GPU listed through
+/// Vulkan and that entry can draw to the window. DirectX 12 lists GPUs only on Windows, so
+/// elsewhere (Mesa's Intel Vulkan driver) the choice never changes.
+fn intel_through_dx12(candidates: &[Candidate], chosen: usize) -> usize {
+    let Some(c) = candidates.get(chosen) else {
+        return chosen;
+    };
+    if c.backend != Backend::Vulkan || c.vendor != INTEL {
+        return chosen;
+    }
+    let same_gpu = |d: &Candidate| {
+        let same_bus = c.pci_bus_id.is_empty() || d.pci_bus_id.is_empty() || c.pci_bus_id == d.pci_bus_id;
+        d.usable && d.backend == Backend::Dx12 && d.vendor == c.vendor && d.device == c.device && d.device_type == c.device_type && same_bus
+    };
+    candidates.iter().position(same_gpu).unwrap_or(chosen)
+}
+
 /// wgpu's device type order for `power` (wgpu-core's `Instance::request_adapter`): lower first.
 /// Without a preference the adapters stay as enumerated.
 fn type_order(device_type: DeviceType, power: PowerPreference) -> u8 {
@@ -119,14 +145,16 @@ fn wgpu_choice(candidates: &[Candidate], power: PowerPreference) -> Option<usize
 
 /// The index of the adapter to draw with: [`wgpu_choice`], or the entry exposing the most
 /// features among those that are the same GPU listed by the same driver (the first of them when
-/// several expose as many). `None` without a usable adapter.
+/// several expose as many); an Intel GPU then draws through DirectX 12 when it can
+/// ([`intel_through_dx12`]). `None` without a usable adapter.
 pub fn choose(candidates: &[Candidate], power: PowerPreference) -> Option<usize> {
     let first = wgpu_choice(candidates, power)?;
     let Some(preferred) = candidates.get(first) else {
         return Some(first);
     };
     let versions = candidates.iter().enumerate().filter(|(_, c)| c.usable && same_gpu_and_driver(preferred, c));
-    versions.max_by_key(|(index, c)| (c.features, Reverse(*index))).map(|(index, _)| index).or(Some(first))
+    let newest = versions.max_by_key(|(index, c)| (c.features, Reverse(*index))).map_or(first, |(index, _)| index);
+    Some(intel_through_dx12(candidates, newest))
 }
 
 /// [`choose`] over enumerated adapters, as egui-wgpu's `native_adapter_selector` for the window
@@ -255,14 +283,9 @@ mod tests {
         let listings: Vec<Vec<Candidate>> = vec![
             vec![],
             vec![nvidia(Vulkan, "0000:01:00.0", "NVIDIA", 70)],
-            // a laptop with two GPUs, through Vulkan and DirectX 12
-            vec![
-                intel(Vulkan, "0000:00:02.0", "Intel Corporation", 60),
-                nvidia(Vulkan, "0000:01:00.0", "NVIDIA", 70),
-                nvidia(Dx12, "0000:01:00.0", "32.0.15.6094", 36),
-                intel(Dx12, "0000:00:02.0", "31.0.101.5186", 36),
-                gpu("Microsoft Basic Render Driver", Dx12, Cpu, 0x1414, 0x8c, "", "10.0.26100.1", "", 36),
-            ],
+            // (a laptop with an Intel and an NVIDIA GPU: `an_intel_gpu_draws_through_directx_12`)
+            // an Intel GPU on Linux: Vulkan (Mesa) only
+            vec![intel(Vulkan, "0000:00:02.0", "Intel open-source Mesa driver", 60)],
             // one GPU through two different drivers, the second exposing more: Linux with AMDVLK and RADV
             vec![radeon("0000:03:00.0", "AMD open-source driver", 58), radeon("0000:03:00.0", "radv", 71)],
             // a vendor's driver and Dozen (Vulkan on DirectX 12)
@@ -282,6 +305,54 @@ mod tests {
             }
         }
         assert_eq!(choose(&[], HighPerformance), None);
+    }
+
+    /// VIDORA: Imal's laptop as wgpu 30 lists it (from its log): Intel UHD Graphics 620 on driver
+    /// 27.20.100.9664, whose Vulkan driver killed every start before the window painted.
+    fn uhd620() -> Vec<Candidate> {
+        vec![
+            gpu("Intel(R) UHD Graphics 620", Vulkan, IntegratedGpu, INTEL, 0x5917, "", "Intel Corporation", "Intel driver", 48),
+            gpu("Intel(R) UHD Graphics 620", Dx12, IntegratedGpu, INTEL, 0x5917, "0000:00:02.0", "27.20.100.9664", "", 36),
+            gpu("Microsoft Basic Render Driver", Dx12, Cpu, 0x1414, 0x8c, "", "10.0.22621.5262", "", 35),
+        ]
+    }
+
+    #[test]
+    fn an_intel_gpu_draws_through_directx_12() {
+        for power in POWERS {
+            assert_eq!(wgpu_choice(&uhd620(), power), Some(0), "wgpu takes Intel's Vulkan driver, which crashed");
+            assert_eq!(choose(&uhd620(), power), Some(1), "{power:?}");
+        }
+        // no DirectX 12 entry (Linux, `WGPU_BACKEND=vulkan`): Vulkan
+        let vulkan_only: Vec<Candidate> = uhd620().into_iter().take(1).collect();
+        assert_eq!(choose(&vulkan_only, HighPerformance), Some(0));
+        // the DirectX 12 entry cannot draw to the window: Vulkan
+        let mut no_surface = uhd620();
+        if let Some(c) = no_surface.get_mut(1) {
+            c.usable = false;
+        }
+        assert_eq!(choose(&no_surface, HighPerformance), Some(0));
+        // another GPU's DirectX 12 entry is not the same GPU
+        let mut other_device = uhd620();
+        if let Some(c) = other_device.get_mut(1) {
+            c.device = 0x3ea0;
+        }
+        assert_eq!(choose(&other_device, HighPerformance), Some(0));
+        // a laptop with an Intel and an NVIDIA GPU: NVIDIA keeps Vulkan; Intel goes through DirectX 12
+        let nvidia = |backend, bus, driver, features| gpu("NVIDIA GeForce RTX 4070", backend, DiscreteGpu, 0x10de, 0x2786, bus, driver, "", features);
+        let intel = |backend, bus, driver, features| gpu("Intel(R) UHD Graphics 770", backend, IntegratedGpu, INTEL, 0x4680, bus, driver, "", features);
+        let laptop = vec![
+            intel(Vulkan, "0000:00:02.0", "Intel Corporation", 60),
+            nvidia(Vulkan, "0000:01:00.0", "NVIDIA", 70),
+            nvidia(Dx12, "0000:01:00.0", "32.0.15.6094", 36),
+            intel(Dx12, "0000:00:02.0", "31.0.101.5186", 36),
+            gpu("Microsoft Basic Render Driver", Dx12, Cpu, 0x1414, 0x8c, "", "10.0.26100.1", "", 36),
+        ];
+        assert_eq!(choose(&laptop, HighPerformance), Some(1));
+        assert_eq!(choose(&laptop, LowPower), Some(3));
+        assert_eq!(choose(&laptop, PowerPreference::None), Some(3));
+        // AMD keeps its Vulkan driver
+        assert_eq!(choose(&g513qy(), HighPerformance), Some(1));
     }
 
     #[test]
@@ -356,7 +427,9 @@ mod tests {
             let picked = pick(&adapters, None, power).ok().map(|a| Candidate::of(&a, None));
             match (&wgpu_own, &picked) {
                 (Some(wgpu_own), Some(picked)) if wgpu_own != picked => {
-                    assert!(same_gpu_and_driver(wgpu_own, picked) && picked.features > wgpu_own.features, "{power:?}: {picked} instead of {wgpu_own}");
+                    let newer = same_gpu_and_driver(wgpu_own, picked) && picked.features > wgpu_own.features;
+                    let intel_dx12 = wgpu_own.vendor == INTEL && picked.vendor == INTEL && picked.backend == Dx12 && picked.device == wgpu_own.device;
+                    assert!(newer || intel_dx12, "{power:?}: {picked} instead of {wgpu_own}");
                 }
                 _ => assert_eq!(picked, wgpu_own, "{power:?}"),
             }

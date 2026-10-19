@@ -17,6 +17,9 @@ Inter font (assets/fonts/Inter-*.ttf) — OFL-1.1. See assets/fonts/OFL-Inter.tx
 Noto Serif font (assets/fonts/NotoSerif-Regular.ttf) — OFL-1.1. See assets/fonts/OFL-NotoSerif.txt.
 JetBrains Mono font (assets/fonts/JetBrainsMono-Regular.ttf) — OFL-1.1. See assets/fonts/OFL-JetBrainsMono.txt.
 Noto Sans Sinhala and Noto Serif Sinhala fonts (packaging/vidora/fonts/) — OFL-1.1. See packaging/vidora/fonts/OFL-NotoSinhala.txt.
+The Windows packages include dxcompiler.dll from Microsoft's DirectX Shader Compiler v1.8.2505.1
+(https://github.com/microsoft/DirectXShaderCompiler) — University of Illinois/NCSA (LLVM) and MIT licences,
+shipped beside it as DXC-LICENSE-LLVM.txt and DXC-LICENSE-MIT.txt.
 Builds made with craft-fonts (CRAFT_FONTS_DIR; all official releases) also embed the fonts listed in
 https://github.com/storytold/craft-fonts/blob/main/ATTRIBUTION.md (BIZ UDPGothic, Shippori Mincho,
 BIZ UDMincho) — OFL-1.1. Their licence texts ship with the packages as OFL-<family>.txt.

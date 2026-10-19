@@ -33,3 +33,5 @@ Places that conflict most often (VIDORA changed them by hand, not by the script)
 - `crates/text/src/layout.rs` (ZWJ and other joiners stay in the face of the cluster before
   them, so Sinhala conjuncts like ශ්‍රී shape correctly in fallback) and the Japanese craft-fonts
   test in `crates/text/src/fonts.rs`
+- `crates/gpu/src/adapter.rs` (`intel_through_dx12`: Intel GPUs draw through DirectX 12, not
+  Intel's Vulkan driver) and `crates/gpu/src/export_renderer.rs` (exports pick their GPU the same way)

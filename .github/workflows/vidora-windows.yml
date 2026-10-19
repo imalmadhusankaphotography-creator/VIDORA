@@ -32,6 +32,20 @@ jobs:
       - name: Install WiX
         shell: pwsh
         run: dotnet tool install --global wix --version 5.0.2
+      # Microsoft's DirectX shader compiler, shipped beside VIDORA.exe (packaging/vidora/package.ps1)
+      - name: Get the DirectX shader compiler
+        shell: pwsh
+        env:
+          DXC_URL: https://github.com/microsoft/DirectXShaderCompiler/releases/download/v1.8.2505.1/dxc_2025_07_14.zip
+          DXC_SHA256: 9ad895a6b039e3a8f8c22a1009f866800b840a74b50db9218d13319e215ea8a4
+        run: |
+          curl.exe -fsSL -o dxc.zip $env:DXC_URL
+          $hash = (Get-FileHash dxc.zip -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($hash -ne $env:DXC_SHA256) { throw "dxc.zip has SHA-256 $hash, expected $env:DXC_SHA256" }
+          Expand-Archive dxc.zip dxc-full -Force
+          New-Item -ItemType Directory -Force dxc | Out-Null
+          Copy-Item dxc-full\bin\x64\dxcompiler.dll, dxc-full\LICENSE-LLVM.txt, dxc-full\LICENSE-MIT.txt dxc
+          "DXC_DIR=$((Resolve-Path dxc).Path)" | Out-File -FilePath $env:GITHUB_ENV -Append
       # ci-run.ps1 turns a failure's compiler errors into an annotation on the run
       - name: Build
         shell: pwsh

@@ -95,13 +95,28 @@ Copy-Item (Join-Path $Bin 'filmcraft-cli.exe') (Join-Path $Stage 'vidora-cli.exe
 Copy-Item (Join-Path $Here 'README-VIDORA.txt') (Join-Path $Stage 'README.txt')
 foreach ($f in 'LICENSE-MIT', 'LICENSE-APACHE', 'NOTICE') { Copy-Item (Join-Path $Root $f) $Stage }
 Copy-Item (Join-Path $Here 'fonts\OFL-NotoSinhala.txt') $Stage
+# Microsoft's DirectX shader compiler beside the exe: wgpu then compiles DirectX 12 shaders with
+# DXC instead of the old FXC, which rejects some of VIDORA's effect shaders (they would fall back
+# to the CPU). $env:DXC_DIR holds dxcompiler.dll and its licences (the workflow downloads them).
+$WithDxc = 'no'
+if ($env:DXC_DIR) {
+  $dll = Join-Path $env:DXC_DIR 'dxcompiler.dll'
+  if (-not (Test-Path $dll)) { throw "DXC_DIR=$env:DXC_DIR has no dxcompiler.dll" }
+  Copy-Item $dll $Stage
+  Copy-Item (Join-Path $env:DXC_DIR 'LICENSE-LLVM.txt') (Join-Path $Stage 'DXC-LICENSE-LLVM.txt')
+  Copy-Item (Join-Path $env:DXC_DIR 'LICENSE-MIT.txt') (Join-Path $Stage 'DXC-LICENSE-MIT.txt')
+  $WithDxc = 'yes'
+  Write-Output "with dxcompiler.dll from $env:DXC_DIR"
+} else {
+  Write-Warning 'DXC_DIR is not set: no dxcompiler.dll, DirectX 12 shaders compile with FXC'
+}
 
 # ---- MSI ---------------------------------------------------------------------------------------
 $Msi = Join-Path $Dist "VIDORA-$Version-windows-x64.msi"
 if (-not $NoMsi) {
   Invoke-Native 'wix build' {
     wix build (Join-Path $Here 'vidora.wxs') -arch x64 `
-      -d "Version=$MsiVersion" -d "BinDir=$Stage" -d "IconPath=$(Join-Path $Root 'assets\app-icon\filmcraft.ico')" `
+      -d "Version=$MsiVersion" -d "BinDir=$Stage" -d "WithDxc=$WithDxc" -d "IconPath=$(Join-Path $Root 'assets\app-icon\filmcraft.ico')" `
       -o $Msi
   }
   Remove-Item -Force -ErrorAction SilentlyContinue ([IO.Path]::ChangeExtension($Msi, '.wixpdb'))

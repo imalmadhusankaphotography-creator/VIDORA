@@ -38,8 +38,10 @@ choose **More info ▸ Run anyway**.
 
 ## If VIDORA doesn't open
 
-VIDORA draws with DirectX 12 or Vulkan. If the window flashes and closes, update the graphics
-driver, or start it from PowerShell in VIDORA's folder with the other backend:
+VIDORA draws with DirectX 12 or Vulkan (Intel graphics through DirectX 12). If a graphics driver
+closes it before the window appears, the next starts try DirectX 12 only, then software rendering.
+Updating the graphics driver usually helps; to pick a backend by hand, start it from PowerShell in
+VIDORA's folder:
 
 ```powershell
 $env:WGPU_BACKEND = "dx12"     # or "vulkan"
@@ -67,6 +69,9 @@ FilmCraft's; that keeps updates from FilmCraft simple).
   and FilmCraft can be installed side by side.
 - No ArtCraft logos or community links (FilmCraft's brand licence asks forks to remove them).
 - Noto Sans Sinhala and Noto Serif Sinhala are built in, for Sinhala titles and captions.
+- Intel graphics draw through DirectX 12 instead of Intel's Vulkan driver, which closed VIDORA
+  before its window appeared on some laptops; `dxcompiler.dll` ships beside `VIDORA.exe` so DirectX 12
+  compiles every effect shader.
 - Windows installer and portable zip from `packaging/vidora/`.
 
 `packaging/vidora/UPDATING.md` explains how a new FilmCraft release is brought into VIDORA.

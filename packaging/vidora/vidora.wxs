@@ -2,7 +2,7 @@
 <!--
   VIDORA MSI (WiX Toolset v5: `dotnet tool install -g wix`). Built by packaging/vidora/package.ps1:
 
-    wix build vidora.wxs -arch x64 -d Version=1.2.3 -d BinDir=... -d IconPath=... -o out.msi
+    wix build vidora.wxs -arch x64 -d Version=1.2.3 -d BinDir=... -d WithDxc=yes|no -d IconPath=... -o out.msi
 
   Per-machine install into Program Files\VIDORA, with Start Menu and desktop shortcuts. Its own
   UpgradeCode, so it installs beside FilmCraft without touching it. No file associations.
@@ -73,6 +73,18 @@
       <Component Id="VidoraFontLicence">
         <File Id="VidoraFontLicence" Source="$(var.BinDir)\OFL-NotoSinhala.txt" KeyPath="yes" />
       </Component>
+      <?if $(var.WithDxc) = "yes" ?>
+      <!-- Microsoft's DirectX shader compiler (LLVM/NCSA and MIT licences) for DirectX 12 shaders. -->
+      <Component Id="VidoraDxc">
+        <File Id="VidoraDxcDll" Source="$(var.BinDir)\dxcompiler.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="VidoraDxcLicenseLlvm">
+        <File Id="VidoraDxcLicenseLlvm" Source="$(var.BinDir)\DXC-LICENSE-LLVM.txt" KeyPath="yes" />
+      </Component>
+      <Component Id="VidoraDxcLicenseMit">
+        <File Id="VidoraDxcLicenseMit" Source="$(var.BinDir)\DXC-LICENSE-MIT.txt" KeyPath="yes" />
+      </Component>
+      <?endif?>
     </ComponentGroup>
   </Fragment>
 </Wix>

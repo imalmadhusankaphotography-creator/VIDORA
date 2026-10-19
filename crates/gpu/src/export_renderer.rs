@@ -112,7 +112,10 @@ impl ExportRenderer {
                     return None;
                 }
                 let instance = wgpu::Instance::default();
-                let adapter = pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions::default())).ok()?;
+                // The window's rule (`crate::adapter`), not `request_adapter`'s: an Intel GPU
+                // through DirectX 12 rather than Intel's Vulkan driver, which can crash (VIDORA).
+                let adapters = pollster::block_on(instance.enumerate_adapters(wgpu::Backends::all()));
+                let adapter = crate::adapter::pick(&adapters, None, wgpu::PowerPreference::default()).ok()?;
                 let (device, queue) = pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor::default())).ok()?;
                 // wgpu's default handler panics on a validation or out-of-memory error; log it and
                 // send the remaining frames to the CPU instead.

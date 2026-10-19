@@ -10,7 +10,8 @@
 //! lists through two installed versions of one driver: there the newer one draws, because a
 //! window drawn through the stale one dies inside the driver (`amdvlk64.dll`; see
 //! `filmcraft_gpu::adapter`). That case is avoided up front instead of left to the fallback
-//! below, which would end in DirectX 12 only.
+//! below, which would end in DirectX 12 only. In VIDORA an Intel GPU also draws through DirectX 12
+//! rather than Intel's Vulkan driver (`igvk64.dll`), for the same reason.
 //!
 //! # When a start counts as failed
 //! The data folder keeps the mode to start with and the failed starts in a row in it
