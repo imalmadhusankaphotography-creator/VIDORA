@@ -1,7 +1,8 @@
 name: VIDORA for Windows
 
-# Every push to main builds VIDORA for Windows x64 (download it from the run's Artifacts).
-# A tag like v0.9.0 also publishes the installer and the portable zip on the Releases page.
+# Every push to main builds VIDORA for Windows x64, starts it once to check that its window comes
+# up, and puts the installer and the portable zip on the Releases page (release v<version>; the
+# run's Artifacts have them too).
 on:
   push:
     branches: [main]
@@ -82,9 +83,24 @@ jobs:
         run: |
           gh release download v0.9.0 -R storytold/filmcraft -p 'filmcraft-0.9.0-windows-x64-portable.zip' -D upstream --clobber
           pwsh packaging/vidora/smoke-test.ps1 -Zip upstream\filmcraft-0.9.0-windows-x64-portable.zip -Exe filmcraft.exe -Title "FilmCraft upstream" -Port 47932
-      - name: Release (tags)
-        if: startsWith(github.ref, 'refs/tags/v')
+      # The Releases page always has the latest build: a push to main whose version has no release
+      # yet creates it (tag v<version> on this commit); later pushes move the tag here and replace
+      # the files. GITHUB_TOKEN's tag doesn't start another run.
+      - name: Publish on the Releases page
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "${{ github.ref_name }}" "$env:MSI" "$env:ZIP" --title "VIDORA ${{ github.ref_name }}" --generate-notes
+        run: |
+          $v = (Select-String -Path Cargo.toml -Pattern '^version = "(.+)"' | Select-Object -First 1).Matches[0].Groups[1].Value
+          $tag = "v$v"
+          gh release view $tag *> $null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create $tag "$env:MSI" "$env:ZIP" --target "$env:GITHUB_SHA" --title "VIDORA $v" --notes-file packaging/vidora/RELEASE-NOTES.md --latest
+          } else {
+            gh api -X PATCH "repos/$env:GITHUB_REPOSITORY/git/refs/tags/$tag" -f sha="$env:GITHUB_SHA" -F force=true | Out-Null
+            gh release edit $tag --title "VIDORA $v" --notes-file packaging/vidora/RELEASE-NOTES.md
+            gh release upload $tag "$env:MSI" "$env:ZIP" --clobber
+          }
+          if ($LASTEXITCODE -ne 0) { throw "publishing $tag failed" }
+          Write-Output "::notice title=Released::$tag https://github.com/$env:GITHUB_REPOSITORY/releases/tag/$tag"

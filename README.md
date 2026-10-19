@@ -23,8 +23,8 @@ Get the latest version from [**Releases**](https://github.com/imalmadhusankaphot
 | `VIDORA-<version>-windows-x64.msi` | Installer: VIDORA in the Start menu and on the desktop |
 | `VIDORA-<version>-windows-x64-portable.zip` | No installation: unzip and run `VIDORA.exe` (works from a pen drive) |
 
-Every push to `main` also builds both, under the run's **Artifacts** on the
-[Actions](https://github.com/imalmadhusankaphotography-creator/VIDORA/actions) tab.
+Every push to `main` rebuilds both, checks that VIDORA starts on Windows, and replaces them on
+the release, so the Releases page always has the latest build.
 
 Windows may warn about an unknown publisher the first time (the files aren't code-signed):
 choose **More info ▸ Run anyway**.

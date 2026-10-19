@@ -14,7 +14,7 @@ with these VIDORA rules on top:
   `python3 packaging/vidora/make_logo_assets.py` makes every app icon file and the About/Home
   wordmarks from it. The logo is his, not covered by the code licence.
 - **Build:** `.github/workflows/vidora-windows.yml` builds the MSI and portable zip
-  (`packaging/vidora/package.ps1`); a `v*` tag publishes a release. The `plan/` files and the
+  (`packaging/vidora/package.ps1`), smoke-tests it and publishes it as release `v<version>`. The `plan/` files and the
   FilmCraft release workflows mentioned below are not part of VIDORA.
 - **Updates from FilmCraft:** `packaging/vidora/UPDATING.md`.
 - **Sinhala:** `packaging/vidora/fonts` (Noto Sans/Serif Sinhala) are embedded through
