@@ -28,12 +28,17 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           shared-key: vidora-windows
+          cache-on-failure: true
       - name: Install WiX
         shell: pwsh
         run: dotnet tool install --global wix --version 5.0.2
-      - name: Build and package
+      # ci-run.ps1 turns a failure's compiler errors into an annotation on the run
+      - name: Build
         shell: pwsh
-        run: pwsh packaging/vidora/package.ps1
+        run: pwsh packaging/vidora/ci-run.ps1 -Title Build -Command "pwsh -NoProfile -File packaging\vidora\package.ps1 -BuildOnly"
+      - name: Package
+        shell: pwsh
+        run: pwsh packaging/vidora/ci-run.ps1 -Title Package -Command "pwsh -NoProfile -File packaging\vidora\package.ps1 -SkipBuild"
       - name: Find the packages
         shell: pwsh
         run: |

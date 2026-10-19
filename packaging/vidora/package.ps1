@@ -18,9 +18,11 @@
   pwsh packaging/vidora/package.ps1
   pwsh packaging/vidora/package.ps1 -SkipBuild
   pwsh packaging/vidora/package.ps1 -NoMsi        # portable zip only (no WiX needed)
+  pwsh packaging/vidora/package.ps1 -BuildOnly    # compile only, no packages
 #>
 param(
   [switch] $SkipBuild,
+  [switch] $BuildOnly,
   [switch] $NoMsi
 )
 $ErrorActionPreference = 'Stop'
@@ -67,6 +69,7 @@ if (-not $SkipBuild) {
   $env:FILMCRAFT_REQUIRE_WINRES = '1'
   Invoke-Native "cargo build ($Target)" { cargo build --release --locked -p filmcraft -p filmcraft-cli --target $Target }
 }
+if ($BuildOnly) { exit 0 }
 
 $Bin = Join-Path $TargetDir "$Target\release"
 
