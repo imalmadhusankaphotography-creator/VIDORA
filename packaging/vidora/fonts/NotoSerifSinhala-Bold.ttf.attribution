@@ -1,0 +1,8 @@
+asset:        packaging/vidora/fonts/NotoSerifSinhala-Bold.ttf
+title:        Noto Serif Sinhala (Bold)
+author:       The Noto Project Authors
+source:       https://github.com/notofonts/sinhala
+license:      OFL-1.1
+license-file: packaging/vidora/fonts/OFL-NotoSinhala.txt
+added:        2026-10-19 for VIDORA (Imal Madhusanka)
+notes:        Sinhala text in titles and captions. Embedded by crates/text/build.rs when built with CRAFT_FONTS_DIR=packaging/vidora.

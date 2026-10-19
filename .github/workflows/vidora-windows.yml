@@ -1,0 +1,57 @@
+name: VIDORA for Windows
+
+# Every push to main builds VIDORA for Windows x64 (download it from the run's Artifacts).
+# A tag like v0.9.0 also publishes the installer and the portable zip on the Releases page.
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: vidora-windows-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 180
+    env:
+      FILMCRAFT_BUILD_SHA: ${{ github.sha }}
+      CARGO_INCREMENTAL: "0"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: vidora-windows
+      - name: Install WiX
+        shell: pwsh
+        run: dotnet tool install --global wix --version 5.0.2
+      - name: Build and package
+        shell: pwsh
+        run: pwsh packaging/vidora/package.ps1
+      - name: Find the packages
+        shell: pwsh
+        run: |
+          $zip = Get-ChildItem dist\VIDORA-*-portable.zip | Select-Object -First 1
+          $msi = Get-ChildItem dist\VIDORA-*.msi | Select-Object -First 1
+          "ZIP=$($zip.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "MSI=$($msi.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Append
+      - uses: actions/upload-artifact@v7
+        with:
+          name: VIDORA-windows-x64-portable
+          path: ${{ env.ZIP }}
+      - uses: actions/upload-artifact@v7
+        with:
+          name: VIDORA-windows-x64-installer
+          path: ${{ env.MSI }}
+      - name: Release (tags)
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${{ github.ref_name }}" "$env:MSI" "$env:ZIP" --title "VIDORA ${{ github.ref_name }}" --generate-notes

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  VIDORA MSI (WiX Toolset v5: `dotnet tool install -g wix`). Built by packaging/vidora/package.ps1:
+
+    wix build vidora.wxs -arch x64 -d Version=1.2.3 -d BinDir=... -d IconPath=... -o out.msi
+
+  Per-machine install into Program Files\VIDORA, with Start Menu and desktop shortcuts. Its own
+  UpgradeCode, so it installs beside FilmCraft without touching it. No file associations.
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package
+      Name="VIDORA"
+      Manufacturer="Imal Madhusanka"
+      Version="$(var.Version)"
+      UpgradeCode="7C1E4A52-3B8D-4F6A-9E21-5D0B8C7A4F13"
+      Scope="perMachine"
+      Compressed="yes"
+      Language="1033">
+    <SummaryInformation Description="VIDORA video editor" Manufacturer="Imal Madhusanka" />
+    <MajorUpgrade AllowSameVersionUpgrades="yes"
+        DowngradeErrorMessage="A newer version of VIDORA is already installed." />
+    <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
+
+    <Icon Id="VidoraIcon.ico" SourceFile="$(var.IconPath)" />
+    <Property Id="ARPPRODUCTICON" Value="VidoraIcon.ico" />
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/imalmadhusankaphotography-creator/VIDORA" />
+    <Property Id="ARPURLUPDATEINFO" Value="https://github.com/imalmadhusankaphotography-creator/VIDORA/releases" />
+    <Property Id="ARPHELPLINK" Value="https://github.com/imalmadhusankaphotography-creator/VIDORA/issues" />
+
+    <StandardDirectory Id="ProgramFiles6432Folder">
+      <Directory Id="INSTALLFOLDER" Name="VIDORA" />
+    </StandardDirectory>
+    <StandardDirectory Id="ProgramMenuFolder" />
+    <StandardDirectory Id="DesktopFolder" />
+
+    <Feature Id="Main" Title="VIDORA" Level="1">
+      <ComponentGroupRef Id="VidoraFiles" />
+    </Feature>
+  </Package>
+
+  <Fragment>
+    <ComponentGroup Id="VidoraFiles" Directory="INSTALLFOLDER">
+      <Component Id="VidoraApp" Guid="2F9D6B31-8C4E-4A7B-B5E0-6A1C3D9E7F24">
+        <File Id="VidoraExe" Source="$(var.BinDir)\VIDORA.exe" KeyPath="yes">
+          <Shortcut Id="StartMenuShortcut" Directory="ProgramMenuFolder" Name="VIDORA"
+              Description="VIDORA video editor" WorkingDirectory="INSTALLFOLDER" Advertise="yes"
+              Icon="VidoraIcon.ico" IconIndex="0" />
+          <Shortcut Id="DesktopShortcut" Directory="DesktopFolder" Name="VIDORA"
+              Description="VIDORA video editor" WorkingDirectory="INSTALLFOLDER" Advertise="yes"
+              Icon="VidoraIcon.ico" IconIndex="0" />
+        </File>
+
+        <RegistryValue Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\App Paths\VIDORA.exe" Value="[#VidoraExe]" Type="string" />
+      </Component>
+
+      <Component Id="VidoraCli">
+        <File Id="VidoraCliExe" Source="$(var.BinDir)\vidora-cli.exe" KeyPath="yes" />
+      </Component>
+
+      <Component Id="VidoraDocs">
+        <File Id="VidoraReadme" Source="$(var.BinDir)\README.txt" KeyPath="yes" />
+        <File Id="VidoraLicenseMit" Source="$(var.BinDir)\LICENSE-MIT" />
+        <File Id="VidoraLicenseApache" Source="$(var.BinDir)\LICENSE-APACHE" />
+        <File Id="VidoraNotice" Source="$(var.BinDir)\NOTICE" />
+        <File Id="VidoraFontLicence" Source="$(var.BinDir)\OFL-NotoSinhala.txt" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+</Wix>

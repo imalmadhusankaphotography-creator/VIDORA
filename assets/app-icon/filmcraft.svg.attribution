@@ -1,0 +1,8 @@
+asset:        filmcraft.svg
+title:        VIDORA app icon (svg)
+author:       Imal Madhusanka (VIDORA)
+source:       original work (placeholder drawn by packaging/vidora/make_icons.py)
+license:      MIT OR Apache-2.0
+license-file: assets/app-icon/LICENSE.txt
+added:        2026-10-19 for VIDORA (Imal Madhusanka)
+notes:        Replaces FilmCraft's owl icon. Regenerate with packaging/vidora/make_icons.py.
