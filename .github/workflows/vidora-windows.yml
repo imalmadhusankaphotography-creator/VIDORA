@@ -54,6 +54,20 @@ jobs:
         with:
           name: VIDORA-windows-x64-installer
           path: ${{ env.MSI }}
+      # Start the packaged app like a user and report whether its window comes up (with its log)
+      # as an annotation; FilmCraft's own release runs alongside for comparison.
+      - name: Smoke test VIDORA
+        shell: pwsh
+        run: pwsh packaging/vidora/smoke-test.ps1 -Zip "$env:ZIP"
+      - name: Smoke test FilmCraft (upstream, for comparison)
+        if: always()
+        continue-on-error: true
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download v0.9.0 -R storytold/filmcraft -p 'filmcraft-0.9.0-windows-x64-portable.zip' -D upstream --clobber
+          pwsh packaging/vidora/smoke-test.ps1 -Zip upstream\filmcraft-0.9.0-windows-x64-portable.zip -Exe filmcraft.exe -Title "FilmCraft upstream" -Port 47932
       - name: Release (tags)
         if: startsWith(github.ref, 'refs/tags/v')
         shell: pwsh
